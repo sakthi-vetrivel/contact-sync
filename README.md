@@ -1,7 +1,3 @@
-Here’s an updated version of the README file based on the new modular structure, explaining how to set up, run, and test the project:
-
----
-
 # Contact Sync Utility
 
 This project is a utility tool to sync contact information from an Excel file into your macOS Address Book. It provides functionality for updating or creating contacts with details such as phone numbers, emails, and birthdays.
@@ -141,7 +137,3 @@ This command will automatically discover and run the tests defined in the `test_
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-This README provides a clear and concise guide for setting up, using, and testing the Contact Sync Utility. It is structured to make it easy for both new users and developers to get started with the project.
