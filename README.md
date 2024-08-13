@@ -12,7 +12,7 @@ I'd test this out first by setting a limit of 10 contacts, using the --skeptical
     pip install -r requirements.txt
 
     python main.py path_to_your_excel_file.xlsx --skeptical --limit=10
-    ```
+ ```
 
 ## Table of Contents
 - [Introduction](#introduction)
