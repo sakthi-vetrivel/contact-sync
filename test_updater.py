@@ -1,18 +1,23 @@
 import openpyxl
+from AddressBook import (
+    ABAddressBook, ABPerson, ABMutableMultiValue, 
+    kABFirstNameProperty, kABLastNameProperty, kABPhoneProperty, 
+    kABEmailProperty, kABBirthdayProperty, 
+    kABPhoneHomeLabel, kABEmailHomeLabel
+)
 from datetime import datetime
-from updater import update_contacts_from_excel  # Import the update function from the main updater script
-from AddressBook import ABAddressBook, ABPerson, ABMutableMultiValue, kABFirstNameProperty, kABLastNameProperty, kABPhoneProperty, kABEmailProperty, kABPhoneHomeLabel, kABEmailHomeLabel, kABBirthdayProperty
+from dateutil import parser  
+import os
 
 def create_test_contacts():
-    # Initialize Address Book
+    """Create a set of unique test contacts in Apple Contacts."""
     address_book = ABAddressBook.sharedAddressBook()
 
-    # Define test contacts with unique and similar names to trigger confirmation
     test_contacts = [
-        {"first_name": "Xanther", "last_name": "Quizzik", "phone": "123-456-7890", "email": "xanther.quizzik@example.com", "birthday": "1990-01-01"},
-        {"first_name": "Xylia", "last_name": "Quizzik", "phone": "234-567-8901", "email": "xylia.quizzik@example.com", "birthday": "1985-05-15"},
-        {"first_name": "Orion", "last_name": "Stardust", "phone": "345-678-9012", "email": "orion.stardust@example.com", "birthday": None},
-        {"first_name": "Eldric", "last_name": "Moonshadow", "phone": None, "email": "eldric.moonshadow@example.com", "birthday": "1992-08-25"},
+        {"first_name": "Xenon", "last_name": "Quasar", "phone": "123-456-7890", "email": "xenon.quasar@example.com", "birthday": "1990-01-01"},
+        {"first_name": "Yara", "last_name": "Nova", "phone": "234-567-8901", "email": "yara.nova@example.com", "birthday": "Jan-15-1985"},
+        {"first_name": "Zephyr", "last_name": "Lunar", "phone": "345-678-9012", "email": "zephyr.lunar@example.com", "birthday": None},
+        {"first_name": "Aura", "last_name": "Solaris", "phone": None, "email": "aura.solaris@example.com", "birthday": "25 August 1992"},
     ]
 
     for contact in test_contacts:
@@ -31,28 +36,62 @@ def create_test_contacts():
             new_contact.setValue_forProperty_(emails, kABEmailProperty)
 
         if contact["birthday"]:
-            birthday_date = datetime.strptime(contact["birthday"], "%Y-%m-%d")
-            new_contact.setValue_forProperty_(birthday_date, kABBirthdayProperty)
+            try:
+                birthday_date = parser.parse(contact["birthday"])
+                new_contact.setValue_forProperty_(birthday_date, kABBirthdayProperty)
+            except ValueError:
+                print(f"Could not parse birthday: {contact['birthday']} for {contact['first_name']} {contact['last_name']}")
 
         address_book.addRecord_(new_contact)
 
-    # Save changes to the Address Book
     address_book.save()
     print("Unique test contacts created successfully!")
 
-def delete_test_contacts():
-    # Initialize Address Book
-    address_book = ABAddressBook.sharedAddressBook()
+def create_test_excel(file_path):
+    """Create a test Excel file with diverse contact data."""
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
 
-    # Define test contacts to delete with unique names
-    test_names = [
-        {"first_name": "Xanther", "last_name": "Quizzik"},
-        {"first_name": "Xylia", "last_name": "Quizzik"},
-        {"first_name": "Orion", "last_name": "Stardust"},
-        {"first_name": "Eldric", "last_name": "Moonshadow"},
+    headers = ["First Name", "Last Name", "WhatsApp Number", "Personal Email", "Location after Graduation", "Social Media Handles", "Birthday"]
+    sheet.append(headers)
+
+    contacts_data = [
+        # Similar names to test fuzzy matching and duplicates
+        ["Xander", "Quasar", "123-456-7890", "xander.quasar@example.com", "New York", "@xander_quasar", "Jan-1"],
+        ["Yara", "Nova", "234-567-8901", "yara.nova@example.com", "Los Angeles", "@yara_nova", "15-Jan-1985"],
+        
+        # Different last name, new contact
+        ["Lyra", "Stellar", "456-789-0123", "lyra.stellar@example.com", "Boston", "@lyra_stellar", "25 Aug 1992"],
+        
+        # Existing contact, with slight variations to test updates
+        ["Zephyr", "Lunar", "345-678-9012", "zephyr.lunar@example.com", "San Francisco", "@zephyr_lunar", None],
+        ["Aura", "Solaris", "567-890-1234", "aura.solaris@example.com", "Chicago", "@aura_solaris", "August 25th 1992"],
+        
+        # Completely new contact with potential duplicates
+        ["Nova", "Galaxy", "678-901-2345", "nova.galaxy@example.com", "Miami", "@nova_galaxy", "Sep-13"],
+        ["Nova", "Galaxy", "678-901-2345", "nova.galaxy@example.com", "Miami", "@nova_galaxy2", "13 September 1993"]
     ]
 
-    # Search for and delete each contact
+    for contact in contacts_data:
+        sheet.append(contact)
+
+    workbook.save(file_path)
+    print(f"Test Excel file created at {file_path}")
+
+def delete_test_contacts():
+    """Delete the test contacts from Apple Contacts."""
+    address_book = ABAddressBook.sharedAddressBook()
+
+    test_names = [
+        {"first_name": "Xenon", "last_name": "Quasar"},
+        {"first_name": "Yara", "last_name": "Nova"},
+        {"first_name": "Zephyr", "last_name": "Lunar"},
+        {"first_name": "Aura", "last_name": "Solaris"},
+        {"first_name": "Xander", "last_name": "Quasar"},
+        {"first_name": "Lyra", "last_name": "Stellar"},
+        {"first_name": "Nova", "last_name": "Galaxy"},
+    ]
+
     people = address_book.people()
     for test_name in test_names:
         for person in people:
@@ -61,20 +100,33 @@ def delete_test_contacts():
                 address_book.removeRecord_(person)
                 print(f"Deleted contact: {test_name['first_name']} {test_name['last_name']}")
 
-    # Save changes to the Address Book
     address_book.save()
     print("Unique test contacts deleted successfully!")
 
 if __name__ == "__main__":
-    # Run the test setup and update process
-    create_test_contacts()
+    # Define the path for the test Excel file
+    test_excel_path = "test_contacts.xlsx"
 
-    # Specify the test Excel file (replace with the path to your actual test file)
-    excel_file_path = "test_contacts.xlsx"
-    update_contacts_from_excel(excel_file_path)
+    # Create a test Excel file with predefined data
+    create_test_excel(test_excel_path)
 
-    # Prompt user to check the contacts
-    input("Please check the updated contacts in your Address Book. Press Enter to continue and clean up test data...")
+    # Run the updater in different modes, cleaning up contacts between runs
+    for mode, description in [
+        ("", "default mode with a limit of 3"),
+        ("--skeptical", "skeptical mode with a limit of 3"),
+        ("", "full update with no limit")
+    ]:
+        print(f"\nRunning {description}:")
+        
+        # Create test contacts in Apple Contacts before each run
+        create_test_contacts()
+        
+        # Run the updater script with the specified mode
+        os.system(f"python3 updater.py {test_excel_path} {mode} --limit=3")
 
-    # Clean up the test data
-    delete_test_contacts()
+        # Clean up the contacts after each run
+        delete_test_contacts()
+
+    # Optionally, delete the test Excel file
+    os.remove(test_excel_path)
+    print(f"Deleted test Excel file: {test_excel_path}")
