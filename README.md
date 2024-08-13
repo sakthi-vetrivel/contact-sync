@@ -1,84 +1,147 @@
-# Contact Sync
+Here’s an updated version of the README file based on the new modular structure, explaining how to set up, run, and test the project:
 
-This script helps you update your Apple Contacts using data from an Excel sheet. It automates the process of adding or updating contact details, ensuring that your contact information is accurate and up-to-date.
+---
 
-## Getting Started
+# Contact Sync Utility
 
-### 1. Clone the Repository
-Download the code to your computer:
-```bash
-git clone https://github.com/yourusername/contact-updater.git
+This project is a utility tool to sync contact information from an Excel file into your macOS Address Book. It provides functionality for updating or creating contacts with details such as phone numbers, emails, and birthdays.
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Testing](#testing)
+- [License](#license)
+
+## Introduction
+
+The Contact Sync Utility simplifies the process of managing your contacts. It reads from an Excel file and either updates existing contacts or creates new ones based on the information provided. The utility also supports "skeptical mode," where it prompts you for confirmation before making changes to your Address Book.
+
+## Features
+
+- **Update or Create Contacts**: Sync phone numbers, emails, and birthdays from an Excel file.
+- **Skeptical Mode**: Get prompted for confirmation before making any updates to your contacts.
+- **Phone Number Normalization**: Automatically formats and normalizes phone numbers for consistency.
+- **Birthday Parsing**: Handles various date formats for birthdays.
+
+## Project Structure
+
+```
+contact_sync/
+│
+├── main.py                # Entry point for running the utility
+├── contact_manager.py     # Core logic for finding, updating, and creating contacts
+├── phone_utils.py         # Utilities for normalizing and formatting phone numbers
+├── birthday_parser.py     # Functions for parsing and handling birthdays
+├── utils.py               # General utility functions
+└── test_contact_sync.py   # Unit tests for the project
 ```
 
-### 2. Install Python
-If you don't have Python installed, download it from [python.org](https://www.python.org/downloads/).
+### Files Description
 
-### 3. Install Required Libraries
-Open your terminal and run:
+- **`main.py`**: The main entry point for the script. It handles command-line arguments and calls the appropriate functions to process contacts.
+- **`contact_manager.py`**: Contains the core logic for managing contacts, including finding existing contacts, generating update summaries, and adding or updating contact information.
+- **`phone_utils.py`**: Handles phone number normalization and formatting to ensure consistency.
+- **`birthday_parser.py`**: Provides functionality to parse birthday strings from different formats.
+- **`utils.py`**: Contains helper functions, such as user confirmation prompts.
+- **`test_contact_sync.py`**: Contains unit tests to verify the functionality of the project.
+
+## Installation
+
+### Prerequisites
+
+- Python 3.6 or higher
+- macOS with Address Book (Contacts) app
+
+### Setup
+
+1. **Clone the Repository**:
+
+    ```bash
+    git clone https://github.com/yourusername/contact-sync.git
+    cd contact-sync
+    ```
+
+2. **Install Dependencies**:
+
+    Use `pip` to install required dependencies.
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    If you don’t have a `requirements.txt` file yet, you can create it with the necessary dependencies:
+
+    ```plaintext
+    openpyxl
+    python-dateutil
+    fuzzywuzzy
+    ```
+   
+   You may also need to install Apple's AddressBook module if it's not already installed.
+
+## Usage
+
+### Running the Script
+
+1. **Basic Usage**:
+
+    To run the script with a specified Excel file:
+
+    ```bash
+    python main.py path_to_your_excel_file.xlsx
+    ```
+
+2. **Skeptical Mode**:
+
+    Use the `--skeptical` flag to enable skeptical mode, where the script will prompt you before making any changes:
+
+    ```bash
+    python main.py path_to_your_excel_file.xlsx --skeptical
+    ```
+
+3. **Limiting the Number of Contacts**:
+
+    Use the `--limit` flag to limit the number of contacts processed:
+
+    ```bash
+    python main.py path_to_your_excel_file.xlsx --limit=10
+    ```
+
+### Excel File Format
+
+The Excel file should have the following columns in the first row:
+
+- `First Name`
+- `Last Name`
+- `WhatsApp Number`
+- `Personal Email`
+- `Location after Graduation`
+- `Social Media Handles`
+- `Birthday`
+
+Ensure that the data in the columns follows these guidelines:
+
+- **Phone Numbers**: Can be in any format (e.g., `(540) 226-2697`, `+1 (540) 226-2697`), and will be normalized by the script.
+- **Emails**: Should be valid email addresses.
+- **Birthdays**: Can be in multiple formats like `Sep-17`, `03/18/2024`, `March 5th`.
+
+## Testing
+
+To run the tests:
+
 ```bash
-pip install openpyxl python-dateutil
+python -m unittest discover
 ```
 
-### 4. Prepare Your Excel File
-Ensure your Excel file (.xlsx) has the following columns: `First Name`, `Last Name`, `WhatsApp Number`, `Personal Email`, `Location`, `Social Media Handles`, and `Birthday`.
+This command will automatically discover and run the tests defined in the `test_contact_sync.py` file.
 
-### 5. Run the Script
+## License
 
-The script accepts three main arguments:
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-- **Excel File Path**: (Required) The path to the `.xlsx` file that contains the contact data.
-- **`--skeptical`**: (Optional) Enables Skeptical Mode, which prompts you for confirmation before making any changes or creating new contacts.
-- **`--limit=n`**: (Optional) Limits the number of contacts to update, processing only the first `n` rows from the Excel file.
+---
 
-#### Example Usage
-
-**Default Mode:**
-```bash
-python3 updater.py path_to_your_excel_file.xlsx --limit=5
-```
-- **Purpose**: Updates the first 5 contacts from your Excel file without asking for confirmation unless multiple matches are found.
-- **Use Case**: Ideal for updating a small batch of contacts quickly.
-
-**Skeptical Mode:**
-```bash
-python3 updater.py path_to_your_excel_file.xlsx --skeptical --limit=10
-```
-- **Purpose**: Asks for confirmation on each change, even if there's only one match.
-- **Use Case**: Useful when dealing with sensitive data or when you want to manually verify each update.
-
-**No Limit:**
-```bash
-python3 updater.py path_to_your_excel_file.xlsx
-```
-- **Purpose**: Updates all contacts in the Excel file without any limit.
-- **Use Case**: Suitable for processing large datasets when you're confident in the data accuracy.
-
-### Understanding the Arguments
-
-- **Excel File Path**: The script needs a path to the Excel file (.xlsx) where your contact data is stored. Without this, the script won't run.
-- **`--skeptical`**: This flag tells the script to enable Skeptical Mode, where every potential change is reviewed by you. It’s useful when you're unsure about the data and want to avoid errors.
-- **`--limit=n`**: Use this argument to specify the number of contacts you want to update. For example, `--limit=10` processes only the first 10 rows. If you don’t provide this argument, the script will process all rows.
-
-### Limitations of the Code
-
-- **Apple Contacts Only**: This script is designed to work with Apple Contacts. It won't work with other contact management systems.
-- **Excel Format**: The script only supports `.xlsx` files. Other file formats like `.csv` or `.xls` are not supported.
-- **Limited Error Handling**: The script assumes that your Excel file is properly formatted. If the file has missing or incorrectly formatted data, the script may not function as expected.
-- **No Duplicate Detection Across Files**: The script does not check for duplicates across multiple Excel files or previous runs. It only checks within the scope of a single run.
-
-### Testing the Code
-
-If you're new to the script or want to test it before updating real contacts, you can create a small test Excel file with a few dummy contacts. Use the `--limit` argument to ensure that only these test contacts are processed. After running the script, you can manually verify the changes in your Apple Contacts.
-
-**Testing Example:**
-```bash
-python3 updater.py test_contacts.xlsx --limit=2 --skeptical
-```
-- **Purpose**: Updates only the first 2 contacts in the `test_contacts.xlsx` file, with you confirming each change.
-
-This allows you to safely test the script and understand how it works before applying it to your entire contact list.
-
-## Need Help?
-
-If you encounter any issues, please open an issue on this GitHub repository.
-
+This README provides a clear and concise guide for setting up, using, and testing the Contact Sync Utility. It is structured to make it easy for both new users and developers to get started with the project.
