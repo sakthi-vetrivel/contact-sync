@@ -2,6 +2,18 @@
 
 This project is a utility tool to sync contact information from an Excel file into your macOS Address Book. It provides functionality for updating or creating contacts with details such as phone numbers, emails, and birthdays.
 
+## tl;dr 
+
+I'd test this out first by setting a limit of 10 contacts, using the --skeptical flag, then maybe 20, and then when you feel confident that it works pretty well, don't set a limit or the skeptical flag. 
+
+ ```bash
+    git clone https://github.com/yourusername/contact-sync.git
+    cd contact-sync
+    pip install -r requirements.txt
+
+    python main.py path_to_your_excel_file.xlsx --skeptical --limit=10
+    ```
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
